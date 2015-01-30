@@ -18,6 +18,8 @@ import android.widget.TextView;
 import com.doomonafireball.betterpickers.R;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class NumberPicker extends LinearLayout implements Button.OnClickListener,
         Button.OnLongClickListener {
@@ -308,6 +310,53 @@ public class NumberPicker extends LinearLayout implements Button.OnClickListener
         enableSetButton();
         // Update the backspace button
         updateDeleteButton();
+
+        updateNumericKeys();
+    }
+
+    private void updateNumericKeys() {
+        String sNumber = getEnteredNumberString();
+        if (!sNumber.isEmpty()) {
+            ArrayList<String> numbers = new ArrayList<>(Arrays.asList(sNumber.split("")));
+            ArrayList<String> max = new ArrayList<>(Arrays.asList(String.valueOf(mMaxNumber).split("")));
+            ArrayList<String> min = new ArrayList<>(Arrays.asList(String.valueOf(mMinNumber).split("")));
+
+            numbers.remove(0);
+            max.remove(0);
+            min.remove(0);
+
+            if (numbers.size() == max.size()) {
+                setKeyRange(-1);
+                return;
+            }
+
+            int number;
+            int maxI;
+            boolean modified = false;
+            for (int i = 0; i < numbers.size(); i++) {
+                number = Integer.valueOf(numbers.get(i));
+                maxI = Integer.valueOf(max.get(i));
+                if (number > maxI) {
+                    setKeyRange(-1);
+                    modified = true;
+                } else if (number == maxI
+                        && max.size() > i) {
+                    setKeyRange(Integer.valueOf(max.get(i + 1)));
+                    modified = true;
+                }
+            }
+
+            if (!modified)
+                setKeyRange(mNumbers.length);
+        } else {
+            setKeyRange(mNumbers.length);
+        }
+    }
+
+    private void setKeyRange(int maxKey) {
+        for (int i = 0; i < mNumbers.length; i++) {
+            mNumbers[i].setEnabled(i <= maxKey);
+        }
     }
 
     /**
